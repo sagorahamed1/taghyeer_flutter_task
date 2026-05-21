@@ -7,6 +7,7 @@ class TransactionModel extends Transaction {
     required super.amount,
     required super.category,
     required super.date,
+    super.type,
     super.isSynced,
   });
 
@@ -17,7 +18,9 @@ class TransactionModel extends Transaction {
       amount: (json['amount'] as num).toDouble(),
       category: json['category'] as String,
       date: DateTime.parse(json['date'] as String),
-      // sqflite stores booleans as 0/1
+      type: (json['type'] as String?) == 'income'
+          ? TransactionType.income
+          : TransactionType.expense,
       isSynced: json['is_synced'] == 1 || json['is_synced'] == true,
     );
   }
@@ -29,6 +32,7 @@ class TransactionModel extends Transaction {
       'amount': amount,
       'category': category,
       'date': date.toIso8601String(),
+      'type': type == TransactionType.income ? 'income' : 'expense',
       'is_synced': isSynced ? 1 : 0,
     };
   }
@@ -40,6 +44,7 @@ class TransactionModel extends Transaction {
       amount: t.amount,
       category: t.category,
       date: t.date,
+      type: t.type,
       isSynced: t.isSynced,
     );
   }
@@ -51,6 +56,7 @@ class TransactionModel extends Transaction {
     double? amount,
     String? category,
     DateTime? date,
+    TransactionType? type,
     bool? isSynced,
   }) {
     return TransactionModel(
@@ -59,6 +65,7 @@ class TransactionModel extends Transaction {
       amount: amount ?? this.amount,
       category: category ?? this.category,
       date: date ?? this.date,
+      type: type ?? this.type,
       isSynced: isSynced ?? this.isSynced,
     );
   }

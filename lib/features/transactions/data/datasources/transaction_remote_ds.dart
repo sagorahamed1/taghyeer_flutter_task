@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../domain/entities/transaction.dart';
 import '../models/transaction_model.dart';
 
 abstract class TransactionRemoteDataSource {
@@ -11,19 +12,21 @@ abstract class TransactionRemoteDataSource {
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   final http.Client client;
 
-  // using jsonplaceholder as a stand-in — swap with real backend
   static const _base = 'https://jsonplaceholder.typicode.com';
 
   TransactionRemoteDataSourceImpl({required this.client});
 
-  static const _categories = [
+  static const _expenseCategories = [
     'Food', 'Transport', 'Shopping', 'Health', 'Entertainment',
+  ];
+  static const _incomeCategories = [
+    'Salary', 'Freelance', 'Investment', 'Gift',
   ];
 
   @override
   Future<List<TransactionModel>> getAll() async {
     final res = await client
-        .get(Uri.parse('$_base/posts?_limit=15'))
+        .get(Uri.parse('$_base/posts?_limit=14'))
         .timeout(const Duration(seconds: 10));
 
     if (res.statusCode != 200) {
@@ -34,11 +37,20 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     return data.asMap().entries.map((entry) {
       final i = entry.key;
       final post = entry.value as Map<String, dynamic>;
+
+      // every 3rd entry is income, rest are expenses
+      final isIncome = i % 3 == 2;
+      final type = isIncome ? TransactionType.income : TransactionType.expense;
+      final category = isIncome
+          ? _incomeCategories[i % _incomeCategories.length]
+          : _expenseCategories[i % _expenseCategories.length];
+
       return TransactionModel(
         id: post['id'].toString(),
         title: (post['title'] as String).split(' ').take(4).join(' '),
-        amount: (i + 1) * 8.75,
-        category: _categories[i % _categories.length],
+        amount: isIncome ? (i + 1) * 45.0 : (i + 1) * 8.75,
+        category: category,
+        type: type,
         date: DateTime.now().subtract(Duration(days: i)),
         isSynced: true,
       );
@@ -47,7 +59,6 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
 
   @override
   Future<TransactionModel> save(TransactionModel t) async {
-    // simulate network latency
     await Future.delayed(const Duration(milliseconds: 400));
     return t.copyWith(isSynced: true);
   }

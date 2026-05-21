@@ -16,18 +16,39 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
+
+  TransactionType _type = TransactionType.expense;
   String _category = 'Food';
   DateTime _date = DateTime.now();
 
-  static const _categories = [
+  static const _expenseCategories = [
     'Food', 'Transport', 'Shopping', 'Health', 'Entertainment',
   ];
+  static const _incomeCategories = [
+    'Salary', 'Freelance', 'Investment', 'Gift', 'Other',
+  ];
+
+  List<String> get _categories =>
+      _type == TransactionType.expense ? _expenseCategories : _incomeCategories;
+
+  Color get _activeColor =>
+      _type == TransactionType.expense
+          ? const Color(0xFFFF6B6B)
+          : const Color(0xFF06D6A0);
 
   @override
   void dispose() {
     _titleCtrl.dispose();
     _amountCtrl.dispose();
     super.dispose();
+  }
+
+  void _onTypeChanged(TransactionType t) {
+    setState(() {
+      _type = t;
+      // reset category to first in the new list
+      _category = _categories.first;
+    });
   }
 
   void _submit() {
@@ -38,6 +59,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       title: _titleCtrl.text.trim(),
       amount: double.parse(_amountCtrl.text),
       category: _category,
+      type: _type,
       date: _date,
     );
 
@@ -71,7 +93,36 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               'New Transaction',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // ── Income / Expense toggle ──
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  _TypeBtn(
+                    label: 'Expense',
+                    icon: Icons.arrow_upward_rounded,
+                    selected: _type == TransactionType.expense,
+                    activeColor: const Color(0xFFFF6B6B),
+                    onTap: () => _onTypeChanged(TransactionType.expense),
+                  ),
+                  _TypeBtn(
+                    label: 'Income',
+                    icon: Icons.arrow_downward_rounded,
+                    selected: _type == TransactionType.income,
+                    activeColor: const Color(0xFF06D6A0),
+                    onTap: () => _onTypeChanged(TransactionType.income),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
             TextFormField(
               controller: _titleCtrl,
               decoration: _inputDeco('Title', Icons.edit_outlined),
@@ -96,7 +147,13 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               },
             ),
             const SizedBox(height: 16),
-            const Text('Category', style: TextStyle(fontWeight: FontWeight.w500)),
+            Text(
+              'Category',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
             const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -109,12 +166,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                       label: Text(cat),
                       selected: selected,
                       onSelected: (_) => setState(() => _category = cat),
-                      selectedColor:
-                          const Color(0xFF6C63FF).withValues(alpha: 0.15),
+                      selectedColor: _activeColor.withValues(alpha: 0.15),
                       labelStyle: TextStyle(
-                        color: selected
-                            ? const Color(0xFF6C63FF)
-                            : Colors.grey[700],
+                        color: selected ? _activeColor : Colors.grey[700],
                         fontWeight: selected
                             ? FontWeight.w600
                             : FontWeight.normal,
@@ -156,14 +210,18 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               child: FilledButton(
                 onPressed: _submit,
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C63FF),
+                  backgroundColor: _activeColor,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text('Save Transaction',
-                    style: TextStyle(fontSize: 16)),
+                child: Text(
+                  _type == TransactionType.expense
+                      ? 'Save Expense'
+                      : 'Save Income',
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
             ),
           ],
@@ -177,7 +235,60 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       labelText: label,
       prefixIcon: Icon(icon, size: 20),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    );
+  }
+}
+
+class _TypeBtn extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  const _TypeBtn({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? activeColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: selected ? Colors.white : Colors.grey[500],
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: selected ? Colors.white : Colors.grey[500],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

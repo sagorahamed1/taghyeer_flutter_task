@@ -20,12 +20,10 @@ class TransactionTile extends StatefulWidget {
 
 class _TransactionTileState extends State<TransactionTile>
     with SingleTickerProviderStateMixin {
-  // unbounded so spring can overshoot past 0
   late final AnimationController _spring;
   double _dragX = 0;
   bool _burstTriggered = false;
 
-  // how far left before we commit to delete
   static const _threshold = -85.0;
 
   @override
@@ -51,13 +49,11 @@ class _TransactionTileState extends State<TransactionTile>
     final vel = d.velocity.pixelsPerSecond.dx;
 
     if (_dragX < _threshold) {
-      // fling off screen, trigger burst, then call onDelete
       _spring.value = _dragX;
       _spring.animateWith(_makeSpring(_dragX, -400, vel)).then((_) {
         if (mounted) setState(() => _burstTriggered = true);
       });
     } else {
-      // spring back to resting position
       _spring.value = _dragX;
       _spring.animateWith(_makeSpring(_dragX, 0, vel));
       setState(() => _dragX = 0);
@@ -80,7 +76,6 @@ class _TransactionTileState extends State<TransactionTile>
       onComplete: widget.onDelete,
       child: Stack(
         children: [
-          // red delete hint behind the card
           Positioned.fill(
             child: Container(
               alignment: Alignment.centerLeft,
@@ -117,6 +112,12 @@ class _TileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIncome = transaction.type == TransactionType.income;
+    final amountColor = isIncome
+        ? const Color(0xFF06D6A0)  // green for income
+        : const Color(0xFFFF6B6B); // red for expense
+    final prefix = isIncome ? '+' : '-';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -133,7 +134,10 @@ class _TileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _CategoryIcon(category: transaction.category),
+          _CategoryIcon(
+            category: transaction.category,
+            isIncome: isIncome,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -160,11 +164,11 @@ class _TileCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${transaction.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
+                '$prefix\$${transaction.amount.toStringAsFixed(2)}',
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: Color(0xFF6C63FF),
+                  color: amountColor,
                 ),
               ),
               const SizedBox(height: 2),
@@ -182,18 +186,26 @@ class _TileCard extends StatelessWidget {
 
 class _CategoryIcon extends StatelessWidget {
   final String category;
+  final bool isIncome;
 
-  const _CategoryIcon({required this.category});
+  const _CategoryIcon({required this.category, required this.isIncome});
 
   static const _icons = <String, IconData>{
+    // expense
     'Food': Icons.restaurant_outlined,
     'Transport': Icons.directions_car_outlined,
     'Shopping': Icons.shopping_bag_outlined,
     'Health': Icons.medical_services_outlined,
     'Entertainment': Icons.movie_outlined,
+    // income
+    'Salary': Icons.account_balance_wallet_outlined,
+    'Freelance': Icons.laptop_outlined,
+    'Investment': Icons.trending_up,
+    'Gift': Icons.card_giftcard_outlined,
+    'Other': Icons.attach_money,
   };
 
-  static const _colors = <String, Color>{
+  static const _expenseColors = <String, Color>{
     'Food': Color(0xFFFF6B6B),
     'Transport': Color(0xFF4ECDC4),
     'Shopping': Color(0xFFFFBE0B),
@@ -201,9 +213,14 @@ class _CategoryIcon extends StatelessWidget {
     'Entertainment': Color(0xFFAB47BC),
   };
 
+  static const _incomeColor = Color(0xFF06D6A0);
+
   @override
   Widget build(BuildContext context) {
-    final color = _colors[category] ?? const Color(0xFF6C63FF);
+    final color = isIncome
+        ? _incomeColor
+        : (_expenseColors[category] ?? const Color(0xFF6C63FF));
+
     return Container(
       width: 44,
       height: 44,

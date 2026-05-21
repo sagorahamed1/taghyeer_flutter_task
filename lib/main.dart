@@ -22,7 +22,7 @@ class SpendArc extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // using .value because the blocs are singletons managed by get_it
+        /// ********** using .value because the blocs are singletons managed by get_it *****
         BlocProvider.value(value: di.sl<TransactionBloc>()),
         BlocProvider.value(value: di.sl<SummaryBloc>()),
       ],

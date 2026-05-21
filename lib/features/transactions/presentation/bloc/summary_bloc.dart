@@ -15,7 +15,6 @@ class SummaryBloc extends Bloc<SummaryEvent, SummaryState> {
     on<_TransactionsUpdated>(_onUpdate);
     on<SetBudget>(_onBudget);
 
-    // inter-bloc communication: react whenever transactions change
     _txSub = transactionBloc.stream.listen((txState) {
       if (txState is TransactionLoaded) {
         add(_TransactionsUpdated(txState.transactions));
@@ -30,20 +29,41 @@ class SummaryBloc extends Bloc<SummaryEvent, SummaryState> {
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
 
-    final monthTotal = event.transactions
-        .where((t) => t.date.isAfter(monthStart))
-        .fold(0.0, (sum, t) => sum + t.amount);
+    double monthIncome = 0;
+    double monthExpense = 0;
+    final dailyIncome = List.filled(7, 0.0);
+    final dailyExpense = List.filled(7, 0.0);
 
-    // bucket transactions into the last 7 days (index 0 = 6 days ago, 6 = today)
-    final daily = List.filled(7, 0.0);
     for (final t in event.transactions) {
+      final isIncome = t.type == TransactionType.income;
+
+      // monthly totals
+      if (t.date.isAfter(monthStart)) {
+        if (isIncome) {
+          monthIncome += t.amount;
+        } else {
+          monthExpense += t.amount;
+        }
+      }
+
+      // bucket into last 7 days
       final diff = now.difference(t.date).inDays;
       if (diff >= 0 && diff < 7) {
-        daily[6 - diff] += t.amount;
+        final idx = 6 - diff;
+        if (isIncome) {
+          dailyIncome[idx] += t.amount;
+        } else {
+          dailyExpense[idx] += t.amount;
+        }
       }
     }
 
-    emit(state.copyWith(totalSpent: monthTotal, last7Days: daily));
+    emit(state.copyWith(
+      totalIncome: monthIncome,
+      totalSpent: monthExpense,
+      last7DaysIncome: dailyIncome,
+      last7DaysExpense: dailyExpense,
+    ));
   }
 
   void _onBudget(SetBudget event, Emitter<SummaryState> emit) {
@@ -52,7 +72,6 @@ class SummaryBloc extends Bloc<SummaryEvent, SummaryState> {
 
   @override
   Future<void> close() {
-    // must cancel or the stream keeps the bloc alive after disposal
     _txSub.cancel();
     return super.close();
   }

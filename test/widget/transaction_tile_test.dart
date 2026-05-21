@@ -27,9 +27,32 @@ void main() {
     );
 
     expect(find.text('Netflix'), findsOneWidget);
-    expect(find.text('\$15.99'), findsOneWidget);
+    // expense shows with a minus prefix
+    expect(find.text('-\$15.99'), findsOneWidget);
     expect(find.byIcon(Icons.movie_outlined), findsOneWidget);
     expect(deleted, isFalse);
+  });
+
+  testWidgets('income shows + prefix in green', (tester) async {
+    final income = Transaction(
+      id: 'income-1',
+      title: 'Salary',
+      amount: 2000,
+      category: 'Salary',
+      type: TransactionType.income,
+      date: DateTime(2024, 5, 20),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TransactionTile(transaction: income, onDelete: () {}),
+        ),
+      ),
+    );
+
+    expect(find.text('+\$2000.00'), findsOneWidget);
+    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsOneWidget);
   });
 
   testWidgets('swipe left reveals delete background', (tester) async {

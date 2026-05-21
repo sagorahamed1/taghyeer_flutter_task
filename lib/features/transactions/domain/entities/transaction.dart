@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
 
+enum TransactionType { income, expense }
+
 class Transaction extends Equatable {
   final String id;
   final String title;
   final double amount;
   final String category;
   final DateTime date;
+  final TransactionType type;
   final bool isSynced;
 
   const Transaction({
@@ -14,6 +17,7 @@ class Transaction extends Equatable {
     required this.amount,
     required this.category,
     required this.date,
+    this.type = TransactionType.expense,
     this.isSynced = false,
   });
 
@@ -23,6 +27,7 @@ class Transaction extends Equatable {
     double? amount,
     String? category,
     DateTime? date,
+    TransactionType? type,
     bool? isSynced,
   }) {
     return Transaction(
@@ -31,10 +36,11 @@ class Transaction extends Equatable {
       amount: amount ?? this.amount,
       category: category ?? this.category,
       date: date ?? this.date,
+      type: type ?? this.type,
       isSynced: isSynced ?? this.isSynced,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, amount, category, date, isSynced];
+  List<Object?> get props => [id, title, amount, category, date, type, isSynced];
 }

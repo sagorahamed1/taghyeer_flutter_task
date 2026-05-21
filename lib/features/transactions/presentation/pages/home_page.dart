@@ -33,7 +33,6 @@ class HomePage extends StatelessWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           context.read<TransactionBloc>().add(LoadTransactions());
-          // give the bloc a moment to reload
           await Future.delayed(const Duration(milliseconds: 600));
         },
         child: SingleChildScrollView(
@@ -48,14 +47,11 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 20),
               const Text(
                 'Recent',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               _TransactionList(),
-              const SizedBox(height: 80), // room for FAB
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -122,14 +118,20 @@ class HomePage extends StatelessWidget {
   }
 }
 
+// ─── Summary card ────────────────────────────────────────────────────────────
+
 class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SummaryBloc, SummaryState>(
       builder: (_, state) {
+        final balanceColor = state.balance >= 0
+            ? const Color(0xFF06D6A0)
+            : const Color(0xFFFF6B6B);
+
         return Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
@@ -143,29 +145,37 @@ class _SummaryCard extends StatelessWidget {
           ),
           child: Column(
             children: [
+              // arc shows expense / income ratio for the month
               ArcMeter(
                 progress: state.usagePercent,
                 spent: state.totalSpent,
-                budget: state.budget,
+                budget: state.totalIncome,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
+              Text(
+                'of income spent this month',
+                style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+              ),
+              const SizedBox(height: 16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _Stat(
-                    label: 'Spent',
-                    value: '\$${state.totalSpent.toStringAsFixed(0)}',
-                    color: const Color(0xFF6C63FF),
+                    label: 'Income',
+                    value: '+\$${state.totalIncome.toStringAsFixed(0)}',
+                    color: const Color(0xFF06D6A0),
                   ),
-                  Container(
-                    width: 1,
-                    height: 36,
-                    color: Colors.grey.shade200,
-                  ),
+                  _divider(),
                   _Stat(
-                    label: 'Remaining',
-                    value: '\$${state.remaining.toStringAsFixed(0)}',
-                    color: Colors.green,
+                    label: 'Balance',
+                    value: '${state.balance >= 0 ? '+' : ''}'
+                        '\$${state.balance.abs().toStringAsFixed(0)}',
+                    color: balanceColor,
+                  ),
+                  _divider(),
+                  _Stat(
+                    label: 'Expense',
+                    value: '-\$${state.totalSpent.toStringAsFixed(0)}',
+                    color: const Color(0xFFFF6B6B),
                   ),
                 ],
               ),
@@ -175,6 +185,12 @@ class _SummaryCard extends StatelessWidget {
       },
     );
   }
+
+  Widget _divider() => Container(
+        width: 1,
+        height: 36,
+        color: Colors.grey.shade200,
+      );
 }
 
 class _Stat extends StatelessWidget {
@@ -190,30 +206,40 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+          ),
+        ],
+      ),
     );
   }
 }
+
+// ─── Chart card ──────────────────────────────────────────────────────────────
 
 class _ChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SummaryBloc, SummaryState>(
       builder: (_, state) {
+        final weekIncome =
+            state.last7DaysIncome.fold(0.0, (s, v) => s + v);
+        final weekExpense =
+            state.last7DaysExpense.fold(0.0, (s, v) => s + v);
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -230,6 +256,7 @@ class _ChartCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // header row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -240,17 +267,26 @@ class _ChartCard extends StatelessWidget {
                       fontSize: 15,
                     ),
                   ),
-                  Text(
-                    _weekTotal(state.last7Days),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF6C63FF),
-                    ),
+                  Row(
+                    children: [
+                      _LegendDot(
+                        color: const Color(0xFF06D6A0),
+                        label: '+\$${weekIncome.toStringAsFixed(0)}',
+                      ),
+                      const SizedBox(width: 10),
+                      _LegendDot(
+                        color: const Color(0xFFFF6B6B),
+                        label: '-\$${weekExpense.toStringAsFixed(0)}',
+                      ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              SpendingChart(data: state.last7Days),
+              SpendingChart(
+                income: state.last7DaysIncome,
+                expenses: state.last7DaysExpense,
+              ),
               const SizedBox(height: 8),
               _DayLabels(),
             ],
@@ -259,10 +295,34 @@ class _ChartCard extends StatelessWidget {
       },
     );
   }
+}
 
-  String _weekTotal(List<double> days) {
-    final total = days.fold(0.0, (s, v) => s + v);
-    return '\$${total.toStringAsFixed(0)}';
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -282,6 +342,8 @@ class _DayLabels extends StatelessWidget {
     );
   }
 }
+
+// ─── Transaction list ─────────────────────────────────────────────────────────
 
 class _TransactionList extends StatelessWidget {
   @override

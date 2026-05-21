@@ -18,8 +18,6 @@ import 'features/transactions/presentation/bloc/transaction_bloc.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // ---- BLoC ----
-  // singletons so SummaryBloc listens to the same TransactionBloc the UI uses
   sl.registerLazySingleton(() => TransactionBloc(
         getTransactions: sl(),
         addTransaction: sl(),
@@ -28,12 +26,10 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => SummaryBloc(transactionBloc: sl()));
 
-  // ---- Use cases ----
   sl.registerLazySingleton(() => GetTransactions(sl()));
   sl.registerLazySingleton(() => AddTransaction(sl()));
   sl.registerLazySingleton(() => DeleteTransaction(sl()));
 
-  // ---- Repository ----
   sl.registerLazySingleton<TransactionRepository>(
     () => TransactionRepositoryImpl(
       local: sl(),
@@ -42,7 +38,6 @@ Future<void> init() async {
     ),
   );
 
-  // ---- Data sources ----
   sl.registerLazySingleton<TransactionLocalDataSource>(
     () => TransactionLocalDataSourceImpl(db: sl()),
   );
@@ -50,10 +45,7 @@ Future<void> init() async {
     () => TransactionRemoteDataSourceImpl(client: sl()),
   );
 
-  // ---- Core ----
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
-
-  // ---- External ----
   sl.registerLazySingleton(() => http.Client());
   sl.registerLazySingleton(() => Connectivity());
 
@@ -65,7 +57,7 @@ Future<Database> _openDatabase() async {
   final dbPath = await getDatabasesPath();
   return openDatabase(
     join(dbPath, 'spendar.db'),
-    version: 1,
+    version: 2,
     onCreate: (db, _) async {
       await db.execute('''
         CREATE TABLE transactions(
@@ -74,6 +66,7 @@ Future<Database> _openDatabase() async {
           amount REAL NOT NULL,
           category TEXT NOT NULL,
           date TEXT NOT NULL,
+          type TEXT NOT NULL DEFAULT 'expense',
           is_synced INTEGER NOT NULL DEFAULT 0
         )
       ''');
@@ -85,6 +78,14 @@ Future<Database> _openDatabase() async {
           created_at TEXT NOT NULL
         )
       ''');
+    },
+    onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 2) {
+        // add type column to existing installs
+        await db.execute(
+          "ALTER TABLE transactions ADD COLUMN type TEXT NOT NULL DEFAULT 'expense'",
+        );
+      }
     },
   );
 }
