@@ -1,0 +1,43 @@
+name: spendar
+description: "SpendArc — Personal finance tracker. Senior Flutter Developer Assessment."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # state management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # DI
+  get_it: ^7.7.0
+
+  # functional error handling
+  dartz: ^0.10.1
+
+  # local db
+  sqflite: ^2.3.3
+  path: ^1.9.0
+
+  # networking
+  http: ^1.2.2
+  connectivity_plus: ^6.0.5
+
+  # utils
+  uuid: ^4.5.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
