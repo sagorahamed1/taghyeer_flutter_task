@@ -114,8 +114,8 @@ class _TileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isIncome = transaction.type == TransactionType.income;
     final amountColor = isIncome
-        ? const Color(0xFF06D6A0)  // green for income
-        : const Color(0xFFFF6B6B); // red for expense
+        ? const Color(0xFF06D6A0)
+        : const Color(0xFFFF6B6B);
     final prefix = isIncome ? '+' : '-';
 
     return Container(

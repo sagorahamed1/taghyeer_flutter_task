@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spendar/features/auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/summary_bloc.dart';
 import '../bloc/transaction_bloc.dart';
 import '../widgets/add_transaction_sheet.dart';
@@ -13,6 +14,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFF4F4F8),
       appBar: AppBar(
         title: const Text(
@@ -27,6 +29,11 @@ class HomePage extends StatelessWidget {
             icon: const Icon(Icons.tune),
             tooltip: 'Set budget',
             onPressed: () => _showBudgetDialog(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+            onPressed: () => context.read<AuthBloc>().add(LogoutRequested()),
           ),
         ],
       ),
@@ -118,8 +125,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ─── Summary card ────────────────────────────────────────────────────────────
-
 class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -145,7 +150,6 @@ class _SummaryCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // arc shows expense / income ratio for the month
               ArcMeter(
                 progress: state.usagePercent,
                 spent: state.totalSpent,
@@ -228,8 +232,6 @@ class _Stat extends StatelessWidget {
   }
 }
 
-// ─── Chart card ──────────────────────────────────────────────────────────────
-
 class _ChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -256,7 +258,6 @@ class _ChartCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // header row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -342,8 +343,6 @@ class _DayLabels extends StatelessWidget {
     );
   }
 }
-
-// ─── Transaction list ─────────────────────────────────────────────────────────
 
 class _TransactionList extends StatelessWidget {
   @override

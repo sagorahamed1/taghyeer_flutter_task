@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'core/network/network_info.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/transactions/data/datasources/transaction_local_ds.dart';
 import 'features/transactions/data/datasources/transaction_remote_ds.dart';
 import 'features/transactions/data/repositories/transaction_repo_impl.dart';
@@ -18,6 +19,8 @@ import 'features/transactions/presentation/bloc/transaction_bloc.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  sl.registerLazySingleton(() => AuthBloc());
+
   sl.registerLazySingleton(() => TransactionBloc(
         getTransactions: sl(),
         addTransaction: sl(),
@@ -81,7 +84,6 @@ Future<Database> _openDatabase() async {
     },
     onUpgrade: (db, oldVersion, newVersion) async {
       if (oldVersion < 2) {
-        // add type column to existing installs
         await db.execute(
           "ALTER TABLE transactions ADD COLUMN type TEXT NOT NULL DEFAULT 'expense'",
         );

@@ -46,7 +46,6 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   void _onTypeChanged(TransactionType t) {
     setState(() {
       _type = t;
-      // reset category to first in the new list
       _category = _categories.first;
     });
   }
@@ -94,8 +93,6 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // ── Income / Expense toggle ──
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
