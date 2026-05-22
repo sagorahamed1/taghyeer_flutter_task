@@ -32,6 +32,8 @@ class _TransactionTileState extends State<TransactionTile>
     _spring = AnimationController.unbounded(vsync: this);
   }
 
+  /// =******* _spring dispose when get back. =========>
+
   @override
   void dispose() {
     _spring.dispose();
@@ -80,8 +82,7 @@ class _TransactionTileState extends State<TransactionTile>
             child: Container(
               alignment: Alignment.centerLeft,
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
               ),
               padding: const EdgeInsets.only(left: 20),
               child: Icon(Icons.delete_outline, color: Colors.red.shade400),

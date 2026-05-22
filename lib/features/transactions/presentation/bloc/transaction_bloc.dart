@@ -42,7 +42,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     final before = state;
 
-    // optimistic update: show the item immediately before the async save
+    /// ****  show the item immediately before the fatch data save ******
     if (before is TransactionLoaded) {
       emit(TransactionLoaded([event.transaction, ...before.transactions]));
     }
@@ -51,14 +51,14 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     result.fold(
       (failure) {
-        // rollback — restore what was there before the optimistic insert
+
         if (before is TransactionLoaded) {
           emit(TransactionLoaded(before.transactions));
         }
         emit(TransactionError(failure.message, previous: _currentList));
       },
       (saved) {
-        // swap the optimistic entry with the confirmed one (isSynced may differ)
+
         final current = state;
         if (current is TransactionLoaded) {
           final updated = current.transactions
@@ -76,7 +76,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   ) async {
     final before = state;
 
-    // optimistic delete
+
     if (before is TransactionLoaded) {
       final removed =
           before.transactions.where((t) => t.id != event.id).toList();
@@ -87,13 +87,13 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     result.fold(
       (failure) {
-        // rollback
+
         if (before is TransactionLoaded) {
           emit(TransactionLoaded(before.transactions));
         }
         emit(TransactionError(failure.message));
       },
-      (_) {}, // already removed optimistically, nothing to do
+      (_) {},
     );
   }
 

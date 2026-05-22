@@ -33,7 +33,7 @@ void main() {
     when(() => mockRepo.deleteTransaction(tId))
         .thenAnswer((_) async => const Left(CacheFailure('delete failed')));
 
-    final result = await useCase(DeleteTransactionParams(tId));
+    final result = await useCase(const DeleteTransactionParams(tId));
 
     expect(result, const Left(CacheFailure('delete failed')));
   });

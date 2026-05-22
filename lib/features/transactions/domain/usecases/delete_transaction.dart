@@ -18,8 +18,8 @@ class DeleteTransaction extends UseCase<String, DeleteTransactionParams> {
 class DeleteTransactionParams extends Equatable {
   final String id;
 
-  // ignore: prefer_const_constructors_in_immutables — Equatable has no const ctor
-  DeleteTransactionParams(this.id);
+
+  const DeleteTransactionParams(this.id);
 
   @override
   List<Object?> get props => [id];

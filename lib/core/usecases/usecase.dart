@@ -6,7 +6,7 @@ abstract class UseCase<Output, Params> {
   Future<Either<Failure, Output>> call(Params params);
 }
 
-// use when a use case needs no input
+///***** use when a use case needs no input *****
 class NoParams extends Equatable {
   @override
   List<Object?> get props => [];

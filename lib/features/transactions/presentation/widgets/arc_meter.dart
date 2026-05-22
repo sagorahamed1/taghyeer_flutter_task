@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class ArcMeter extends StatefulWidget {
-  final double progress; // 0.0 → 1.0
+  final double progress;
   final double spent;
   final double budget;
 
@@ -87,10 +87,12 @@ class _ArcMeterState extends State<ArcMeter>
   }
 
   Color _arcColor(double p) {
-    if (p < 0.6) return const Color(0xFF6C63FF);
+    if (p < 0.6) return Colors.deepPurpleAccent;
     if (p < 0.85) return Colors.orange;
     return Colors.red;
   }
+
+
 }
 
 class _ArcPainter extends CustomPainter {
@@ -130,7 +132,7 @@ class _ArcPainter extends CustomPainter {
     }
   }
 
-  // only repaint when values that affect drawing change
+
   @override
   bool shouldRepaint(_ArcPainter old) {
     return old.progress != progress || old.color != color;

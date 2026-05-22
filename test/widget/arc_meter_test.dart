@@ -18,7 +18,7 @@ void main() {
       ),
     );
 
-    // let the entrance animation settle
+
     await tester.pumpAndSettle();
 
     expect(find.text('\$600'), findsOneWidget);

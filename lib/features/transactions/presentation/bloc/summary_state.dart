@@ -17,7 +17,7 @@ class SummaryState extends Equatable {
 
   double get balance => totalIncome - totalSpent;
 
-  // arc shows what fraction of income was spent this month
+  /// ******** arc shows what fraction of income was spent this month**
   double get usagePercent =>
       totalIncome == 0 ? 0 : (totalSpent / totalIncome).clamp(0.0, 1.0);
 

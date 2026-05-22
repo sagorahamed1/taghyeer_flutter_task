@@ -1,5 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+
+/// ***********Internet checking offline or online ***********>>
+
 abstract class NetworkInfo {
   Future<bool> get isConnected;
 }

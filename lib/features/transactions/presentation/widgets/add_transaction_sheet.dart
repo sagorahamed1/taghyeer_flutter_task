@@ -13,6 +13,7 @@ class AddTransactionSheet extends StatefulWidget {
 }
 
 class _AddTransactionSheetState extends State<AddTransactionSheet> {
+
   final _formKey = GlobalKey<FormState>();
   final _titleCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
@@ -24,6 +25,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   static const _expenseCategories = [
     'Food', 'Transport', 'Shopping', 'Health', 'Entertainment',
   ];
+
   static const _incomeCategories = [
     'Salary', 'Freelance', 'Investment', 'Gift', 'Other',
   ];
@@ -31,17 +33,21 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   List<String> get _categories =>
       _type == TransactionType.expense ? _expenseCategories : _incomeCategories;
 
+
   Color get _activeColor =>
       _type == TransactionType.expense
           ? const Color(0xFFFF6B6B)
           : const Color(0xFF06D6A0);
 
+
+  /// =========Dispose all controller *=======>
   @override
   void dispose() {
     _titleCtrl.dispose();
     _amountCtrl.dispose();
     super.dispose();
   }
+
 
   void _onTypeChanged(TransactionType t) {
     setState(() {
@@ -78,6 +84,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   @override
   Widget build(BuildContext context) {
+
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -103,14 +110,15 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 children: [
                   _TypeBtn(
                     label: 'Expense',
-                    icon: Icons.arrow_upward_rounded,
+                    icon: Icons.arrow_downward_rounded,
                     selected: _type == TransactionType.expense,
                     activeColor: const Color(0xFFFF6B6B),
                     onTap: () => _onTypeChanged(TransactionType.expense),
                   ),
                   _TypeBtn(
                     label: 'Income',
-                    icon: Icons.arrow_downward_rounded,
+
+                    icon: Icons.arrow_upward_rounded,
                     selected: _type == TransactionType.income,
                     activeColor: const Color(0xFF06D6A0),
                     onTap: () => _onTypeChanged(TransactionType.income),
@@ -119,18 +127,22 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               ),
             ),
 
+
+
             const SizedBox(height: 16),
             TextFormField(
               controller: _titleCtrl,
-              decoration: _inputDeco('Title', Icons.edit_outlined),
+              decoration: _inputDeco('Title'),
               textCapitalization: TextCapitalization.sentences,
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Enter a title' : null,
             ),
+
+
             const SizedBox(height: 14),
             TextFormField(
               controller: _amountCtrl,
-              decoration: _inputDeco('Amount (\$)', Icons.attach_money),
+              decoration: _inputDeco('Amount (\$)'),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
@@ -143,6 +155,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 return null;
               },
             ),
+
+
+
             const SizedBox(height: 16),
             Text(
               'Category',
@@ -151,6 +166,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 color: Colors.grey[700],
               ),
             ),
+
+
+
             const SizedBox(height: 8),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -175,6 +193,10 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 }).toList(),
               ),
             ),
+
+
+
+
             const SizedBox(height: 14),
             InkWell(
               onTap: _pickDate,
@@ -201,6 +223,9 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 ),
               ),
             ),
+
+
+
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -221,16 +246,18 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
                 ),
               ),
             ),
+
+
+
           ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDeco(String label, IconData icon) {
+  InputDecoration _inputDeco(String label) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, size: 20),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       contentPadding:
           const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

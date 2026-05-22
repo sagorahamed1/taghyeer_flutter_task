@@ -34,26 +34,28 @@ class SummaryBloc extends Bloc<SummaryEvent, SummaryState> {
     final dailyIncome = List.filled(7, 0.0);
     final dailyExpense = List.filled(7, 0.0);
 
-    for (final t in event.transactions) {
-      final isIncome = t.type == TransactionType.income;
+    for (final tnx in event.transactions) {
+      final isIncome = tnx.type == TransactionType.income;
 
-      // monthly totals
-      if (t.date.isAfter(monthStart)) {
+      /// ***** monthly
+
+      if (tnx.date.isAfter(monthStart)) {
         if (isIncome) {
-          monthIncome += t.amount;
+          monthIncome += tnx.amount;
         } else {
-          monthExpense += t.amount;
+          monthExpense += tnx.amount;
         }
       }
 
-      // bucket into last 7 days
-      final diff = now.difference(t.date).inDays;
+      /// last 7 days
+
+      final diff = now.difference(tnx.date).inDays;
       if (diff >= 0 && diff < 7) {
         final idx = 6 - diff;
         if (isIncome) {
-          dailyIncome[idx] += t.amount;
+          dailyIncome[idx] += tnx.amount;
         } else {
-          dailyExpense[idx] += t.amount;
+          dailyExpense[idx] += tnx.amount;
         }
       }
     }

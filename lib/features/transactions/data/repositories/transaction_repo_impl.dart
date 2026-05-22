@@ -22,15 +22,21 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<Either<Failure, List<Transaction>>> getTransactions() async {
     try {
-      // load from local immediately so there's no loading flash
+
+      /// load from local immediately so there's no loading flash
+
       final localData = await local.getAll();
 
       if (await networkInfo.isConnected) {
-        // fire-and-forget: sync in background without blocking the caller
+
+        /// fire-and-forget: sync in background without blocking the caller
+
         _backgroundSync(localData);
+
       }
 
       return Right(localData);
+
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
@@ -42,7 +48,9 @@ class TransactionRepositoryImpl implements TransactionRepository {
   ) async {
     final model = TransactionModel.fromEntity(transaction);
     try {
-      // write locally first (offline-first write queue)
+
+      /// write locally first (offline-first write)
+
       await local.save(model);
 
       if (await networkInfo.isConnected) {
@@ -50,12 +58,15 @@ class TransactionRepositoryImpl implements TransactionRepository {
         await local.save(synced); // update isSynced flag
         return Right(synced);
       } else {
-        // queue for later when we're back online
+
+        /// ****** Call later when we're back online ******
+
         await local.enqueuePendingOp('add', model.toJson());
+
         return Right(model);
+
       }
     } catch (e) {
-      // couldn't persist — remove the record we just wrote
       await local.delete(model.id);
       return Left(CacheFailure(e.toString()));
     }
@@ -82,19 +93,21 @@ class TransactionRepositoryImpl implements TransactionRepository {
     try {
       final remoteData = await remote.getAll();
 
-      // heavy diff runs in an isolate to avoid jank on the main thread
-      final merged = await Isolate.run(
+      /// ****** heavy diff runs in an isolate to avoid jank on the main thread
+
+       final merged = await Isolate.run(
         () => _diffTransactions(localData, remoteData),
       );
 
       await local.saveAll(merged);
     } catch (_) {
-      // silent — user already sees local data, sync failure is not fatal
+
     }
   }
 }
 
-// top-level so Isolate.run can serialize it
+/// *********** top-level so Isolate.run can serialize it *******
+
 List<TransactionModel> _diffTransactions(
   List<TransactionModel> local,
   List<TransactionModel> remote,
@@ -103,12 +116,13 @@ List<TransactionModel> _diffTransactions(
 
   final result = <TransactionModel>[];
 
-  // keep local entries that haven't synced yet (pending writes)
+  /// keep local entries that have not fetch yet (pending writes)
+
   for (final t in local) {
     if (!t.isSynced) result.add(t);
   }
 
-  // merge remote — remote wins unless local has an unsynced edit
+
   for (final t in remote) {
     final existing = localById[t.id];
     if (existing != null && !existing.isSynced) continue; // keep local

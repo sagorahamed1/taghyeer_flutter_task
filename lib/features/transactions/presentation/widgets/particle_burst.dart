@@ -32,6 +32,7 @@ class _ParticleBurstState extends State<ParticleBurst>
     Colors.red,
   ];
 
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +46,7 @@ class _ParticleBurstState extends State<ParticleBurst>
       }
     });
   }
+
 
   @override
   void didUpdateWidget(ParticleBurst old) {
@@ -62,11 +64,13 @@ class _ParticleBurstState extends State<ParticleBurst>
     }
   }
 
+
   @override
   void dispose() {
     _ctrl.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {

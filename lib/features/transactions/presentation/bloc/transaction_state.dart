@@ -21,7 +21,6 @@ class TransactionLoaded extends TransactionState {
 class TransactionError extends TransactionState {
   final String message;
 
-  // kept so the UI can show previous data while also showing the error
   final List<Transaction>? previous;
 
   TransactionError(this.message, {this.previous});

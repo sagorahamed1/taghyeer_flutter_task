@@ -43,7 +43,7 @@ void main() {
       final json = tModel.toJson();
       expect(json['id'], 'model-1');
       expect(json['amount'], 55.25);
-      expect(json['is_synced'], 1); // booleans go in as int for sqflite
+      expect(json['is_synced'], 1);
     });
 
     test('roundtrip: fromJson(toJson()) preserves all fields', () {

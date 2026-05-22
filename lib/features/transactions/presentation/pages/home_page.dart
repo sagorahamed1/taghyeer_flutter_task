@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spendar/features/auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/summary_bloc.dart';
 import '../bloc/transaction_bloc.dart';
 import '../widgets/add_transaction_sheet.dart';
@@ -14,8 +13,12 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFF4F4F8),
+
+
+
       appBar: AppBar(
         title: const Text(
           'SpendArc',
@@ -26,17 +29,15 @@ class HomePage extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune),
+            icon: const Text("Set Budget"),
             tooltip: 'Set budget',
             onPressed: () => _showBudgetDialog(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
-            onPressed: () => context.read<AuthBloc>().add(LogoutRequested()),
-          ),
         ],
       ),
+
+
+
       body: RefreshIndicator(
         onRefresh: () async {
           context.read<TransactionBloc>().add(LoadTransactions());
@@ -53,7 +54,7 @@ class HomePage extends StatelessWidget {
               _ChartCard(),
               const SizedBox(height: 20),
               const Text(
-                'Recent',
+                'Recent Income and Expense',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
@@ -63,14 +64,22 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+
+
+
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAddSheet(context),
         backgroundColor: const Color(0xFF6C63FF),
-        icon: const Icon(Icons.add),
-        label: const Text('Add'),
+        label: const Text('Add Income or Expense', style: TextStyle(color: Colors.white)),
       ),
+
+
+
     );
   }
+
+
 
   void _openAddSheet(BuildContext context) {
     showModalBottomSheet(
@@ -349,6 +358,9 @@ class _TransactionList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<TransactionBloc, TransactionState>(
       listener: (ctx, state) {
+
+        ///=========If came Errors ===========>
+
         if (state is TransactionError) {
           ScaffoldMessenger.of(ctx).showSnackBar(
             SnackBar(
@@ -359,6 +371,10 @@ class _TransactionList extends StatelessWidget {
           );
         }
       },
+
+
+      ///=========Loading time ===========>
+
       builder: (ctx, state) {
         if (state is TransactionLoading) {
           return const Center(
@@ -369,11 +385,14 @@ class _TransactionList extends StatelessWidget {
           );
         }
 
+
         final transactions = switch (state) {
           TransactionLoaded(:final transactions) => transactions,
           TransactionError(:final previous) => previous ?? [],
           _ => <dynamic>[],
         };
+
+        ///=========If Data Empty ===========>
 
         if (transactions.isEmpty) {
           return Center(
@@ -393,6 +412,9 @@ class _TransactionList extends StatelessWidget {
             ),
           );
         }
+
+
+        ///========= All Transaction ===========>
 
         return Column(
           children: transactions.map((t) {

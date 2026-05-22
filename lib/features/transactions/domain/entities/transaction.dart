@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+///*********Two type input income or expense *******
+
 enum TransactionType { income, expense }
 
 class Transaction extends Equatable {

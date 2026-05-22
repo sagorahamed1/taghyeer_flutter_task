@@ -67,7 +67,7 @@ void main() {
       ),
     );
 
-    // drag left, red hint should appear
+
     await tester.drag(find.text('Netflix'), const Offset(-60, 0));
     await tester.pump();
 
