@@ -57,3 +57,10 @@ flutter run
 - Remote data is fetched from JSONPlaceholder (a public mock API) and mapped to transaction objects for demonstration purposes.
 - Local data persists across app restarts using SQLite.
 - If the device is offline, new transactions are saved locally and queued for sync when connectivity is restored.
+
+
+
+<img width="430" height="962" alt="image" src="https://github.com/user-attachments/assets/ad60a82a-f2f9-4fd7-be15-a2319cdd6067" />
+<img width="428" height="955" alt="image" src="https://github.com/user-attachments/assets/a108d559-56fb-461c-b13c-787da15465f8" />
+
+
